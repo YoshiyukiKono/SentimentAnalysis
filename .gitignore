@@ -1,3 +1,4 @@
+.oracle_jre_usage
 .cache
 .conda
 .config
@@ -6,3 +7,5 @@
 .viminfo
 *.json
 nltk_data
+.nv
+.pip
