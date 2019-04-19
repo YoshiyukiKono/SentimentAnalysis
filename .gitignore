@@ -9,3 +9,7 @@
 nltk_data
 .nv
 .pip
+*.pkl
+.bash_history
+*.swp
+__pycache__
