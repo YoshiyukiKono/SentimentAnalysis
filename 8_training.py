@@ -100,3 +100,6 @@ for epoch in range(epochs):
                  )
             
             model.train()
+
+torch.save(model.state_dict(), "./model.pth")
+torch.save(model, "./model.torch")
