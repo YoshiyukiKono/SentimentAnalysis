@@ -12,7 +12,6 @@ vocab_l = pickle.load(open('vocab.pickle', 'rb'))
 
 import torch
 
-from person import Person
 from sentiment import TextClassifier
 
 
@@ -20,6 +19,9 @@ PATH = "./model.torch"
 # torch.load with map_location='cpu'
 model_l = torch.load(PATH,map_location='cpu')
 #model_l.to("cpu")
+
+class UnknownWordsError(Exception):
+  "Only unknown words are included in text"
 
 def preprocess(message):
     """
@@ -84,11 +86,15 @@ def predict_func(text, model, vocab):
     
     # TODO Implement
     tokens = preprocess(text)
+    
 
     # Filter non-vocab words
     tokens = [token for token in tokens if token in vocab] #pass
     # Convert words to ids
     tokens = [vocab[token] for token in tokens] #pass
+
+    if len(tokens) == 0:
+      raise UnknownWordsError
 
     # Adding a batch dimension
     text_input = torch.from_numpy(np.asarray(torch.LongTensor(tokens).view(-1, 1)))
@@ -105,15 +111,20 @@ def predict_func(text, model, vocab):
     return pred
 
 
-def predict(args):
+def predict_api(args):
   text = args.get('text')
-  result = predict_func(text, model_l, vocab_l)
-  return result.detach().numpy()
+  try:
+    result = predict_func(text, model_l, vocab_l)
+    return result.detach().numpy()[0]
+  except UnknownWordsError:
+    return [0,0,1,0,0]
+    
 
 #"message": "The result could not be encoded in JSON.",
-
-#args = {"text": "Google is working on self driving cars, I'm bullish on $goog"}
+args = {"text": "Google is working on self driving cars, I'm bullish on $goog"}
 #args = {"text": "I'm bullish on $goog"}
-#args = {"text": "I'll strongly recommend to buy on $goog"}
-#result = predict(args)
-#print(result)
+args = {"text": "I'll strongly recommend to buy on $goog"}
+#args = {"text": "日本語だとどうなる $goog"}
+#args = {"text": "elyoq baoq pquq $goog"}
+result = predict_api(args)
+print(result)
